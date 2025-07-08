@@ -16,9 +16,13 @@
 
         </div>
         <div class="mb-3">
-            <label for="image" class="form-label">Image</label>
-            <input name="listing[image][url]" value="<%= listing.image.url %>" type="text" class="form-control" required>
-            <div class="invalid-feedback">Please enter a valid URL for Image</div>
+            Original Listing Image <br />
+            <img src="<%= originalImageUrl %>"/>
+        </div>
+        <div class="mb-3">
+            <label for="image" class="form-label">Upload New Image</label>
+            <input name="listing[image][url]"  type="file" class="form-control">
+        
         </div>
         
         <div class="row">
