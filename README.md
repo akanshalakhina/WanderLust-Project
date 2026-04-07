@@ -1,4 +1,4 @@
-# 🌍 WanderLust Project
+# 🌍 StayHub - Travel Accomodation Platform
 
 WanderLust is a full-stack web application that allows users to explore, review, and add beautiful destinations around the world. Built with the MERN stack, it’s designed for travel lovers who want to discover and share wander-worthy places.
 
