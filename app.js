@@ -4,10 +4,12 @@ if (process.env.NODE_ENV !== "production") {
 
 const express = require("express");
 const app = express();
+
 const mongoose = require("mongoose");
 const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
+
 const ExpressError = require("./utils/ExpressError.js");
 
 const session = require("express-session");
@@ -44,6 +46,7 @@ async function main() {
 // ================= VIEW ENGINE =================
 
 app.set("view engine", "ejs");
+
 app.set("views", path.join(__dirname, "views"));
 
 app.engine("ejs", ejsMate);
@@ -52,6 +55,7 @@ app.engine("ejs", ejsMate);
 // ================= MIDDLEWARE =================
 
 app.use(express.urlencoded({ extended: true }));
+
 app.use(methodOverride("_method"));
 
 app.use(express.static(path.join(__dirname, "public")));
@@ -60,6 +64,7 @@ app.use(express.static(path.join(__dirname, "public")));
 // ================= SESSION STORE =================
 
 const store = MongoStore.create({
+
   mongoUrl: dbUrl,
 
   crypto: {
@@ -67,6 +72,8 @@ const store = MongoStore.create({
   },
 
   touchAfter: 24 * 3600,
+
+  
 });
 
 store.on("error", (err) => {
@@ -77,6 +84,7 @@ store.on("error", (err) => {
 // ================= SESSION CONFIG =================
 
 const sessionOptions = {
+
   store,
 
   secret: process.env.SECRET,
@@ -86,12 +94,15 @@ const sessionOptions = {
   saveUninitialized: false,
 
   cookie: {
-    expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+
+    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
 
     maxAge: 7 * 24 * 60 * 60 * 1000,
 
     httpOnly: true,
+
   },
+
 };
 
 app.use(session(sessionOptions));
@@ -123,6 +134,7 @@ app.use((req, res, next) => {
   res.locals.currUser = req.user;
 
   next();
+
 });
 
 
@@ -138,19 +150,37 @@ app.use("/listings/:id/reviews", reviewRouter);
 // ================= ERROR HANDLING =================
 
 app.all("*", (req, res, next) => {
+
   next(new ExpressError(404, "Page Not Found"));
+
 });
 
+
 app.use((err, req, res, next) => {
+
+  if (res.headersSent) {
+    return next(err);
+  }
 
   let { statusCode = 500, message = "Something went wrong!" } = err;
 
   res.status(statusCode).render("Error.ejs", { message });
+
 });
 
 
 // ================= SERVER =================
 
-app.listen(8080, () => {
-  console.log("server is listening to port 8080");
+const PORT = process.env.PORT || 3000;
+
+const server = app.listen(PORT, () => {
+  console.log(`Server is listening on port ${PORT}`);
+});
+
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(`Port ${PORT} is already in use. Set process.env.PORT to a different port or stop the service using that port.`);
+    process.exit(1);
+  }
+  throw err;
 });
